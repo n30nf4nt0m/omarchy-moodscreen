@@ -340,6 +340,69 @@ var FAMILIES = [
       { id: "foundFootage", name: "Found Footage", subtitle: "old VHS security tape", params: { mono: 0.60, lines: 0.40, soft: 0.40, interference: 0.30, overlay: true, clock: true, camTint: [1.00, 0.88, 0.68], noise: 0.12, vignette: 0.30 } },
       { id: "stillFrame", name: "Still Frame", subtitle: "the look with no motion, saves GPU", params: { mono: 0.90, lines: 0.35, soft: 0.30, interference: 0.0, overlay: true, clock: false, camTint: [0.92, 1.00, 0.95], noise: 0.08, vignette: 0.30 } }
     ]
+  },
+  {
+    id: "noir",
+    name: "Noir",
+    subtitle: "Hard black and white, blind shadows and smoke",
+    defaults: { punch: 0.5, blinds: 0.0, spot: 0.0, smoke: 0.0, filmTint: [1.00, 1.00, 1.00] },
+    liveWhen: ["smoke"],
+    controls: [
+      { key: "punch", label: "Contrast punch", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "blinds", label: "Venetian blinds", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "spot", label: "Spotlight", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "smoke", label: "Smoke", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "filmTint", label: "Print", type: "swatch", options: [
+        { name: "Pure",       value: [1.00, 1.00, 1.00] },
+        { name: "Silver",     value: [0.94, 0.97, 1.00] },
+        { name: "Warm Print", value: [1.00, 0.93, 0.82] },
+        { name: "Midnight",   value: [0.80, 0.88, 1.00] }
+      ] }
+    ],
+    presets: [
+      { id: "detective", name: "Detective", subtitle: "blind shadows across the desk", params: { punch: 0.55, blinds: 0.60, spot: 0.25, smoke: 0.0, filmTint: [1.00, 1.00, 1.00], noise: 0.08, vignette: 0.35 } },
+      { id: "midnight", name: "Midnight", subtitle: "blue night, smoke drifting by", params: { punch: 0.50, blinds: 0.30, spot: 0.0, smoke: 0.40, filmTint: [0.80, 0.88, 1.00], noise: 0.10, vignette: 0.45, bright: 0.95 } },
+      { id: "silverScreen", name: "Silver Screen", subtitle: "clean, grainy studio print", params: { punch: 0.35, blinds: 0.0, spot: 0.0, smoke: 0.0, filmTint: [0.94, 0.97, 1.00], noise: 0.12, vignette: 0.25 } },
+      { id: "interrogation", name: "Interrogation", subtitle: "one hard light, the rest in shadow", params: { punch: 0.70, blinds: 0.0, spot: 0.80, smoke: 0.30, filmTint: [1.00, 1.00, 1.00], noise: 0.08, vignette: 0.50 } },
+      { id: "hardBoiled", name: "Hard-Boiled", subtitle: "crushed blacks, warm pulp print", params: { punch: 0.85, blinds: 0.45, spot: 0.0, smoke: 0.0, filmTint: [1.00, 0.93, 0.82], noise: 0.14, vignette: 0.40 } }
+    ]
+  },
+  {
+    id: "thermal",
+    name: "Thermal",
+    subtitle: "Heat-camera false colour, brighter reads hotter",
+    defaults: {
+      palette: [[0.02, 0.00, 0.10], [0.40, 0.00, 0.55], [0.90, 0.20, 0.20], [1.00, 0.65, 0.05], [1.00, 1.00, 0.80]],
+      heat: 0.5, soft: 0.4, outline: 0.2, shimmer: 0.0, hud: false
+    },
+    liveWhen: ["shimmer"],
+    controls: [
+      { key: "heat", label: "Sensitivity", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "soft", label: "Softness", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "outline", label: "Edge outline", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "shimmer", label: "Heat shimmer", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "palette", label: "Palette", type: "swatch", options: [
+        { name: "Ironbow",   value: [[0.02, 0.00, 0.10], [0.40, 0.00, 0.55], [0.90, 0.20, 0.20], [1.00, 0.65, 0.05], [1.00, 1.00, 0.80]] },
+        { name: "Rainbow",   value: [[0.05, 0.05, 0.60], [0.00, 0.75, 0.90], [0.20, 0.90, 0.20], [1.00, 0.90, 0.00], [1.00, 0.15, 0.05]] },
+        { name: "Lava",      value: [[0.05, 0.00, 0.00], [0.45, 0.02, 0.00], [0.85, 0.20, 0.00], [1.00, 0.55, 0.05], [1.00, 0.90, 0.40]] },
+        { name: "Arctic",    value: [[0.00, 0.02, 0.10], [0.00, 0.20, 0.50], [0.10, 0.60, 0.90], [0.60, 0.90, 1.00], [1.00, 1.00, 1.00]] },
+        { name: "White Hot", value: [[0.00, 0.00, 0.00], [0.25, 0.25, 0.25], [0.50, 0.50, 0.50], [0.75, 0.75, 0.75], [1.00, 1.00, 1.00]] },
+        { name: "Black Hot", value: [[1.00, 1.00, 1.00], [0.75, 0.75, 0.75], [0.50, 0.50, 0.50], [0.25, 0.25, 0.25], [0.00, 0.00, 0.00]] }
+      ] },
+      { key: "hud", label: "Camera HUD", type: "toggle" }
+    ],
+    presets: [
+      { id: "ironbow", name: "Ironbow", subtitle: "the classic purple-to-white heat map", params: {
+        palette: [[0.02, 0.00, 0.10], [0.40, 0.00, 0.55], [0.90, 0.20, 0.20], [1.00, 0.65, 0.05], [1.00, 1.00, 0.80]], heat: 0.50, soft: 0.40, outline: 0.20, shimmer: 0.0, hud: true } },
+      { id: "hunter", name: "Hunter", subtitle: "rainbow heat, shimmering air", params: {
+        palette: [[0.05, 0.05, 0.60], [0.00, 0.75, 0.90], [0.20, 0.90, 0.20], [1.00, 0.90, 0.00], [1.00, 0.15, 0.05]], heat: 0.55, soft: 0.25, outline: 0.45, shimmer: 0.35, hud: false, vignette: 0.30 } },
+      { id: "whiteHot", name: "White Hot", subtitle: "grayscale, hot is bright", params: {
+        palette: [[0.00, 0.00, 0.00], [0.25, 0.25, 0.25], [0.50, 0.50, 0.50], [0.75, 0.75, 0.75], [1.00, 1.00, 1.00]], heat: 0.45, soft: 0.35, outline: 0.30, shimmer: 0.0, hud: true, noise: 0.06 } },
+      { id: "blackHot", name: "Black Hot", subtitle: "inverted, hot is dark", params: {
+        palette: [[1.00, 1.00, 1.00], [0.75, 0.75, 0.75], [0.50, 0.50, 0.50], [0.25, 0.25, 0.25], [0.00, 0.00, 0.00]], heat: 0.45, soft: 0.35, outline: 0.25, shimmer: 0.0, hud: true, noise: 0.06 } },
+      { id: "heatwave", name: "Heatwave", subtitle: "molten lava palette, rippling haze", params: {
+        palette: [[0.05, 0.00, 0.00], [0.45, 0.02, 0.00], [0.85, 0.20, 0.00], [1.00, 0.55, 0.05], [1.00, 0.90, 0.40]], heat: 0.60, soft: 0.45, outline: 0.10, shimmer: 0.60, hud: false, vignette: 0.20 } }
+    ]
   }
 ]
 

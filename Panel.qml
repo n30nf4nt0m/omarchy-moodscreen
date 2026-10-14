@@ -305,7 +305,7 @@ Panel {
         model: sw.isPalette ? sw.option.value : []
         Rectangle {
           required property var modelData
-          width: sw.width / 4 - 0.5
+          width: sw.width / sw.option.value.length - 0.5
           height: sw.height - 2
           color: Qt.rgba(modelData[0], modelData[1], modelData[2], 1)
         }

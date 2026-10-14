@@ -1,7 +1,7 @@
 # Moodscreen
 
 A plugin for the [Omarchy](https://omarchy.org/) shell that lays a
-full-screen mood shader over the whole desktop. It has twelve families, each
+full-screen mood shader over the whole desktop. It has fourteen families, each
 with its own presets and sliders:
 
 - **Glass**: frosted, rippled or stained glass
@@ -16,6 +16,8 @@ with its own presets and sliders:
 - **Post-Apocalypse**: faded, dusty, grimy, with dust storms and film scratches
 - **Matrix**: phosphor-tinted desktop behind falling code
 - **Security Camera**: grainy CCTV with scan lines, interference, `REC` and a running timecode
+- **Noir**: hard black and white with venetian-blind shadows, a spotlight and smoke
+- **Thermal**: heat-camera false colour (Ironbow, Rainbow, White/Black Hot…) with an optional crosshair HUD
 
 ## Install
 

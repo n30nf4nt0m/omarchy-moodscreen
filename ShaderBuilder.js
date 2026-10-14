@@ -388,6 +388,35 @@ var EDGE_BODY =
   "  float ly = luma1(texture(tex, uv0 + vec2(0.0, eo.y)).rgb) - luma1(texture(tex, uv0 - vec2(0.0, eo.y)).rgb);\n" +
   "  float edge = clamp(length(vec2(lx, ly)) * 3.0, 0.0, 1.0);\n"
 
+// Seven-segment glyphs for the on-screen text. Bits: a=1 b=2 c=4 d=8
+// e=16 f=32 g=64; a glyph cell is 1 wide by 2 tall, y pointing down.
+// Code 0 is a blank, -1 a colon.
+var SEG_FNS =
+  "const int SEG_DIGITS[10] = int[10](63, 6, 91, 79, 102, 109, 125, 7, 127, 111);\n" +
+  "float segH(vec2 q, float y, float w) { return step(abs(q.y - y), w) * step(w, q.x) * step(q.x, 1.0 - w); }\n" +
+  "float segV(vec2 q, float x, float y0, float w) { return step(abs(q.x - x), w) * step(y0 + w, q.y) * step(q.y, y0 + 1.0 - w); }\n" +
+  "float segGlyph(vec2 q, int m) {\n" +
+  "  if (m == 0 || q.x < -0.2 || q.x > 1.2 || q.y < -0.2 || q.y > 2.2) return 0.0;\n" +
+  "  if (m < 0) return max(step(length(q - vec2(0.5, 0.6)), 0.16), step(length(q - vec2(0.5, 1.4)), 0.16));\n" +
+  "  float w = 0.17;\n" +
+  "  float o = 0.0;\n" +
+  "  if ((m & 1) != 0) o = max(o, segH(q, 0.0, w));\n" +
+  "  if ((m & 2) != 0) o = max(o, segV(q, 1.0, 0.0, w));\n" +
+  "  if ((m & 4) != 0) o = max(o, segV(q, 1.0, 1.0, w));\n" +
+  "  if ((m & 8) != 0) o = max(o, segH(q, 2.0, w));\n" +
+  "  if ((m & 16) != 0) o = max(o, segV(q, 0.0, 1.0, w));\n" +
+  "  if ((m & 32) != 0) o = max(o, segV(q, 0.0, 0.0, w));\n" +
+  "  if ((m & 64) != 0) o = max(o, segH(q, 1.0, w));\n" +
+  "  return o;\n" +
+  "}\n" +
+  // segText: up to 8 glyphs left to right from `origin`, `u` px per unit.
+  "float segText(vec2 px, vec2 origin, float u, int codes[8]) {\n" +
+  "  vec2 q = (px - origin) / u;\n" +
+  "  float slot = floor(q.x / 1.6);\n" +
+  "  if (slot < 0.0 || slot > 7.0 || q.y < -0.3 || q.y > 2.3) return 0.0;\n" +
+  "  return segGlyph(vec2(q.x - slot * 1.6, q.y), codes[int(slot)]);\n" +
+  "}\n"
+
 function toxicEffect(p, timed) {
   var toxicity = clamp(p.toxicity, 0.0, 1.0)
   var glow = clamp(p.glow, 0.0, 1.0)
@@ -567,35 +596,7 @@ function cctvEffect(p, timed) {
   consts += "const float INTERFERENCE = " + f(interference) + ";\n"
   consts += "const vec3  CAMTINT = " + vec3(camTint) + ";\n"
   consts += NOISE_FNS
-  if (overlay) {
-    // Seven-segment glyphs for the on-screen text. Bits: a=1 b=2 c=4 d=8
-    // e=16 f=32 g=64; a glyph cell is 1 wide by 2 tall, y pointing down.
-    // Code 0 is a blank, -1 a colon.
-    consts += "const int SEG_DIGITS[10] = int[10](63, 6, 91, 79, 102, 109, 125, 7, 127, 111);\n"
-    consts += "float segH(vec2 q, float y, float w) { return step(abs(q.y - y), w) * step(w, q.x) * step(q.x, 1.0 - w); }\n"
-    consts += "float segV(vec2 q, float x, float y0, float w) { return step(abs(q.x - x), w) * step(y0 + w, q.y) * step(q.y, y0 + 1.0 - w); }\n"
-    consts += "float segGlyph(vec2 q, int m) {\n"
-    consts += "  if (m == 0 || q.x < -0.2 || q.x > 1.2 || q.y < -0.2 || q.y > 2.2) return 0.0;\n"
-    consts += "  if (m < 0) return max(step(length(q - vec2(0.5, 0.6)), 0.16), step(length(q - vec2(0.5, 1.4)), 0.16));\n"
-    consts += "  float w = 0.17;\n"
-    consts += "  float o = 0.0;\n"
-    consts += "  if ((m & 1) != 0) o = max(o, segH(q, 0.0, w));\n"
-    consts += "  if ((m & 2) != 0) o = max(o, segV(q, 1.0, 0.0, w));\n"
-    consts += "  if ((m & 4) != 0) o = max(o, segV(q, 1.0, 1.0, w));\n"
-    consts += "  if ((m & 8) != 0) o = max(o, segH(q, 2.0, w));\n"
-    consts += "  if ((m & 16) != 0) o = max(o, segV(q, 0.0, 1.0, w));\n"
-    consts += "  if ((m & 32) != 0) o = max(o, segV(q, 0.0, 0.0, w));\n"
-    consts += "  if ((m & 64) != 0) o = max(o, segH(q, 1.0, w));\n"
-    consts += "  return o;\n"
-    consts += "}\n"
-    // Up to 8 glyphs laid out left to right from `origin`, `u` px per unit.
-    consts += "float segText(vec2 px, vec2 origin, float u, int codes[8]) {\n"
-    consts += "  vec2 q = (px - origin) / u;\n"
-    consts += "  float slot = floor(q.x / 1.6);\n"
-    consts += "  if (slot < 0.0 || slot > 7.0 || q.y < -0.3 || q.y > 2.3) return 0.0;\n"
-    consts += "  return segGlyph(vec2(q.x - slot * 1.6, q.y), codes[int(slot)]);\n"
-    consts += "}\n"
-  }
+  if (overlay) consts += SEG_FNS
 
   var body = ""
   body += "  vec2 cuv = uv0;\n"
@@ -662,6 +663,125 @@ function cctvEffect(p, timed) {
   return { consts: consts, body: body }
 }
 
+function noirEffect(p, timed) {
+  var punch = clamp(p.punch, 0.0, 1.0)
+  var blinds = clamp(p.blinds, 0.0, 1.0)
+  var spot = clamp(p.spot, 0.0, 1.0)
+  var smoke = clamp(p.smoke, 0.0, 1.0)
+  var filmTint = p.filmTint || [1.0, 1.0, 1.0]
+  var t = timed ? "time" : "0.0"
+
+  var consts = ""
+  consts += "const float PUNCH = " + f(punch) + ";\n"
+  consts += "const float BLINDS = " + f(blinds) + ";\n"
+  consts += "const float SPOT = " + f(spot) + ";\n"
+  consts += "const float SMOKE = " + f(smoke) + ";\n"
+  consts += "const vec3  FILMTINT = " + vec3(filmTint) + ";\n"
+  if (smoke > 0.0) consts += NOISE_FNS
+
+  var body = ""
+  body += "  float lv = luma1(texture(tex, uv0).rgb);\n"
+  // Steeper S-curve: blacks crush, whites bloom.
+  body += "  float pc = clamp((lv - 0.5) * (1.0 + PUNCH * 1.2) + 0.5, 0.0, 1.0);\n"
+  body += "  lv = mix(lv, pc * pc * (3.0 - 2.0 * pc), PUNCH);\n"
+  if (blinds > 0.0) {
+    // Slatted window light slanting in from the top left.
+    body += "  float slat = fract((uv0.y + uv0.x * 0.35) * 11.0);\n"
+    body += "  float lit = smoothstep(0.0, 0.06, slat) * smoothstep(0.62, 0.54, slat);\n"
+    body += "  float fall = smoothstep(1.5, 0.2, length(uv0 * vec2(aspect, 1.0)));\n"
+    body += "  lv *= 1.0 - BLINDS * 0.6 * (1.0 - lit) * mix(0.35, 1.0, fall);\n"
+    body += "  lv += BLINDS * 0.08 * lit * fall;\n"
+  }
+  if (spot > 0.0) {
+    body += "  float sd = length((uv0 - vec2(0.45, 0.40)) * vec2(aspect, 1.0));\n"
+    body += "  lv *= mix(1.0, 1.15 - smoothstep(0.15, 0.95, sd) * 0.85, SPOT);\n"
+  }
+  if (smoke > 0.0) {
+    body += "  float st = " + t + ";\n"
+    body += "  vec2 sp = uv0 * vec2(aspect, 1.0) * 2.5 + vec2(st * 0.04, -st * 0.07);\n"
+    body += "  float sn = mNoise(sp) * 0.6 + mNoise(sp * 2.1 + vec2(-st * 0.05, 0.0)) * 0.3 + mNoise(sp * 4.3) * 0.1;\n"
+    body += "  lv = mix(lv, 0.75, SMOKE * 0.35 * smoothstep(0.45, 0.95, sn));\n"
+  }
+  body += "  vec3 col = vec3(lv) * FILMTINT;\n"
+  return { consts: consts, body: body }
+}
+
+function thermalEffect(p, timed) {
+  var heat = clamp(p.heat, 0.0, 1.0)
+  var soft = clamp(p.soft, 0.0, 1.0)
+  var outline = clamp(p.outline, 0.0, 1.0)
+  var shimmer = clamp(p.shimmer, 0.0, 1.0)
+  var hud = !!p.hud
+  var pal = p.palette || [[0.02, 0.0, 0.1], [0.4, 0.0, 0.55], [0.9, 0.2, 0.2], [1.0, 0.65, 0.05], [1.0, 1.0, 0.8]]
+
+  var consts = ""
+  consts += "const float HEAT = " + f(heat) + ";\n"
+  consts += "const float SOFT = " + f(soft) + ";\n"
+  consts += "const float OUTLINE = " + f(outline) + ";\n"
+  consts += "const float SHIMMER = " + f(shimmer) + ";\n"
+  for (var i = 0; i < 5; i++) consts += "const vec3  PAL" + i + " = " + vec3(pal[Math.min(i, pal.length - 1)]) + ";\n"
+  // Heat proxy: brightness, nudged up for warm colours and down for cool ones.
+  consts += "float heatOf(vec3 c) { return clamp(dot(c, vec3(0.2126, 0.7152, 0.0722)) * 0.85 + (c.r - c.b) * 0.2 + 0.05, 0.0, 1.0); }\n"
+  consts += "float heatCurve(float h) { return clamp((h - 0.5) * (0.6 + HEAT * 1.6) + 0.5, 0.0, 1.0); }\n"
+  consts += "vec3 thermalPal(float h) {\n"
+  consts += "  float x = clamp(h, 0.0, 1.0) * 4.0;\n"
+  consts += "  if (x < 1.0) return mix(PAL0, PAL1, x);\n"
+  consts += "  if (x < 2.0) return mix(PAL1, PAL2, x - 1.0);\n"
+  consts += "  if (x < 3.0) return mix(PAL2, PAL3, x - 2.0);\n"
+  consts += "  return mix(PAL3, PAL4, x - 3.0);\n"
+  consts += "}\n"
+  if (shimmer > 0.0) consts += NOISE_FNS
+  if (hud) consts += SEG_FNS
+
+  var body = ""
+  body += "  float h = heatOf(texture(tex, uv0).rgb);\n"
+  if (soft > 0.0 || outline > 0.0) {
+    // Neighbourhood heat: blurs the image when soft, and tells the outline
+    // what the surrounding background is.
+    body += "  vec2 so = max(SOFT * 2.0, 1.5) * texel;\n"
+    body += "  float hb = (heatOf(texture(tex, uv0 + vec2(so.x, 0.0)).rgb) + heatOf(texture(tex, uv0 - vec2(so.x, 0.0)).rgb)\n"
+    body += "           + heatOf(texture(tex, uv0 + vec2(0.0, so.y)).rgb) + heatOf(texture(tex, uv0 - vec2(0.0, so.y)).rgb)) * 0.25;\n"
+  }
+  if (soft > 0.0) body += "  h = mix(h, hb, min(SOFT, 0.85));\n"
+  body += "  h = heatCurve(h);\n"
+  if (shimmer > 0.0) {
+    // Rising heat haze. It wobbles the heat value, never the sample point.
+    var st = timed ? "time" : "0.0"
+    body += "  h += SHIMMER * 0.10 * (mNoise(uv0 * vec2(aspect, 1.0) * 7.0 + vec2(0.0, " + st + " * 0.8)) - 0.5);\n"
+  }
+  body += "  vec3 col = thermalPal(h);\n"
+  if (outline > 0.0) {
+    body += EDGE_BODY
+    // Outline in the opposite end of the palette from the surrounding area,
+    // so edges and text stand out: cold lines on hot backgrounds and back.
+    body += "  col = mix(col, heatCurve(hb) > 0.5 ? PAL0 : PAL4, edge * OUTLINE * 0.9);\n"
+  }
+  if (hud) {
+    body += "  vec2 hpx = uv0 * res;\n"
+    body += "  float osc = max(1.0, res.y / 1080.0);\n"
+    body += "  vec2 hc = res * 0.5;\n"
+    // Crosshair with a gap in the middle.
+    body += "  vec2 dd = abs(hpx - hc);\n"
+    body += "  float crossHair = step(dd.y, osc) * step(8.0 * osc, dd.x) * step(dd.x, 28.0 * osc) + step(dd.x, osc) * step(8.0 * osc, dd.y) * step(dd.y, 28.0 * osc);\n"
+    body += "  col = mix(col, vec3(1.0), clamp(crossHair, 0.0, 1.0));\n"
+    // Spot reading for the pixel under the crosshair, shown in degrees C.
+    body += "  int tC = int(15.0 + heatCurve(heatOf(texture(tex, vec2(0.5)).rgb)) * 30.0 + 0.5);\n"
+    body += "  int reading[8] = int[8](SEG_DIGITS[tC / 10], SEG_DIGITS[tC % 10], 99, 57, 0, 0, 0, 0);\n"
+    body += "  float u = 12.0 * osc;\n"
+    body += "  vec2 ro = hc + vec2(36.0 * osc, -2.0 * u - 12.0 * osc);\n"
+    body += "  col = mix(col, vec3(0.0), segText(hpx - vec2(2.0 * osc), ro, u, reading) * 0.6);\n"
+    body += "  col = mix(col, vec3(1.0), segText(hpx, ro, u, reading));\n"
+    // Palette scale bar on the right edge, hot at the top.
+    body += "  vec2 b0 = vec2(res.x - 64.0 * osc, res.y * 0.3);\n"
+    body += "  vec2 b1 = vec2(res.x - 48.0 * osc, res.y * 0.7);\n"
+    body += "  float inBar = step(b0.x, hpx.x) * step(hpx.x, b1.x) * step(b0.y, hpx.y) * step(hpx.y, b1.y);\n"
+    body += "  float inFrame = step(b0.x - 2.0 * osc, hpx.x) * step(hpx.x, b1.x + 2.0 * osc) * step(b0.y - 2.0 * osc, hpx.y) * step(hpx.y, b1.y + 2.0 * osc);\n"
+    body += "  col = mix(col, vec3(1.0), inFrame * (1.0 - inBar));\n"
+    body += "  col = mix(col, thermalPal(1.0 - (hpx.y - b0.y) / (b1.y - b0.y)), inBar);\n"
+  }
+  return { consts: consts, body: body }
+}
+
 var EFFECTS = {
   glass: glassEffect,
   neon: neonEffect,
@@ -674,7 +794,9 @@ var EFFECTS = {
   toxic: toxicEffect,
   wasteland: wastelandEffect,
   matrix: matrixEffect,
-  cctv: cctvEffect
+  cctv: cctvEffect,
+  noir: noirEffect,
+  thermal: thermalEffect
 }
 
 // mode: "static" | "live". Live declares `time`; static never does (see
