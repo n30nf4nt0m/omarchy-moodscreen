@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.phillipelwood1.moodscreen",
+  "name": "Moodscreen",
+  "version": "1.1.0",
+  "author": "phillipelwood1",
+  "license": "MIT",
+  "description": "A screen-wide mood shader with eight families: Glass, Neon, Game Boy, VHS/Vaporwave, Fireplace, Computer, Scanlines and Water.",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "service": "Service.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Moodscreen",
+    "description": "Switch on a full-screen mood shader and pick a family: Glass, Neon, Game Boy, VHS/Vaporwave, Fireplace, Computer, Scanlines or Water.",
+    "category": "Appearance",
+    "aliases": [
+      "moodscreen",
+      "glass",
+      "neon",
+      "gameboy",
+      "vhs",
+      "vaporwave",
+      "fireplace",
+      "computer",
+      "amiga",
+      "macintosh",
+      "apple",
+      "commodore",
+      "c64",
+      "dos",
+      "teletext",
+      "scanlines",
+      "crt",
+      "water",
+      "rain",
+      "aquarium",
+      "ice",
+      "shader"
+    ],
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
