@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "io.github.phillipelwood1.moodscreen",
   "name": "Moodscreen",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "phillipelwood1",
   "license": "MIT",
-  "description": "A screen-wide mood shader with eight families: Glass, Neon, Game Boy, VHS/Vaporwave, Fireplace, Computer, Scanlines and Water.",
+  "description": "A screen-wide mood shader with twelve families: Glass, Neon, Game Boy, VHS/Vaporwave, Fireplace, Computer, Scanlines, Water, Toxic, Post-Apocalypse, Matrix and Security Camera.",
   "kinds": [
     "service",
     "bar-widget"
@@ -16,7 +16,7 @@
   },
   "barWidget": {
     "displayName": "Moodscreen",
-    "description": "Switch on a full-screen mood shader and pick a family: Glass, Neon, Game Boy, VHS/Vaporwave, Fireplace, Computer, Scanlines or Water.",
+    "description": "Switch on a full-screen mood shader and pick a family: Glass, Neon, Game Boy, VHS/Vaporwave, Fireplace, Computer, Scanlines, Water, Toxic, Post-Apocalypse, Matrix or Security Camera.",
     "category": "Appearance",
     "aliases": [
       "moodscreen",
@@ -40,6 +40,20 @@
       "rain",
       "aquarium",
       "ice",
+      "toxic",
+      "radioactive",
+      "acid",
+      "post-apocalypse",
+      "apocalypse",
+      "wasteland",
+      "dust",
+      "matrix",
+      "code rain",
+      "hacker",
+      "security camera",
+      "cctv",
+      "surveillance",
+      "night vision",
       "shader"
     ],
     "allowMultiple": false,

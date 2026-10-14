@@ -1,6 +1,6 @@
 .pragma library
 
-// Moodscreen: five unrelated full-screen looks, one per "family". A family
+// Moodscreen: unrelated full-screen looks, one per "family". A family
 // owns its own shader effect and its own tunable params; everything shares
 // four universal picture controls (bright, contrast, saturation, vignette)
 // plus a common grain, applied after the family effect runs.
@@ -228,6 +228,117 @@ var FAMILIES = [
       { id: "rain", name: "Rain", subtitle: "streaked glass in a downpour", params: { dropAmount: 0.60, caustic: 0.0, frost: 0.0, fish: 0.0, tint: [0.85, 0.90, 0.95], saturation: 0.90, vignette: 0.15 } },
       { id: "aquarium", name: "Aquarium", subtitle: "shimmering tank, one fish swimming by", params: { dropAmount: 0.0, caustic: 0.50, frost: 0.0, fish: 1.0, tint: [0.70, 0.95, 0.90], saturation: 1.15, vignette: 0.10 } },
       { id: "ice", name: "Ice", subtitle: "frosted, crystalline chill", params: { dropAmount: 0.0, caustic: 0.0, frost: 0.60, fish: 0.0, tint: [0.85, 0.93, 1.00], saturation: 0.85, contrast: 1.05, vignette: 0.20 } }
+    ]
+  },
+  {
+    id: "toxic",
+    name: "Toxic",
+    subtitle: "Radioactive glow with ooze rising from below",
+    defaults: { toxicity: 0.5, glow: 0.4, ooze: 0.3, pulse: 0.15, toxin: [0.45, 1.00, 0.15] },
+    liveWhen: ["ooze", "pulse"],
+    controls: [
+      { key: "toxicity", label: "Contamination", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "glow", label: "Edge glow", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "ooze", label: "Ooze", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "pulse", label: "Pulse", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "toxin", label: "Toxin", type: "swatch", options: [
+        { name: "Radioactive", value: [0.45, 1.00, 0.15] },
+        { name: "Acid",        value: [0.85, 1.00, 0.10] },
+        { name: "Chemical",    value: [0.70, 0.25, 1.00] },
+        { name: "Biohazard",   value: [1.00, 0.60, 0.05] },
+        { name: "Coolant",     value: [0.10, 1.00, 0.80] }
+      ] }
+    ],
+    presets: [
+      { id: "radioactive", name: "Radioactive", subtitle: "green glow, slow ooze", params: { toxicity: 0.55, glow: 0.45, ooze: 0.30, pulse: 0.15, toxin: [0.45, 1.00, 0.15], vignette: 0.20 } },
+      { id: "sludge", name: "Toxic Sludge", subtitle: "thick bubbling ooze, heavy tint", params: { toxicity: 0.75, glow: 0.30, ooze: 0.65, pulse: 0.10, toxin: [0.85, 1.00, 0.10], vignette: 0.30, contrast: 1.10 } },
+      { id: "chemicalSpill", name: "Chemical Spill", subtitle: "violet glow, restless pulse", params: { toxicity: 0.50, glow: 0.55, ooze: 0.35, pulse: 0.30, toxin: [0.70, 0.25, 1.00], saturation: 1.15 } },
+      { id: "biohazard", name: "Biohazard", subtitle: "orange warning glow", params: { toxicity: 0.45, glow: 0.50, ooze: 0.20, pulse: 0.25, toxin: [1.00, 0.60, 0.05], vignette: 0.25 } },
+      { id: "contaminated", name: "Contaminated", subtitle: "faint tint and glow, no motion", params: { toxicity: 0.30, glow: 0.30, ooze: 0.0, pulse: 0.0, toxin: [0.45, 1.00, 0.15] } }
+    ]
+  },
+  {
+    id: "wasteland",
+    name: "Post-Apocalypse",
+    subtitle: "Faded, dusty and scratched, like the world ended",
+    defaults: { fade: 0.5, dust: 0.4, dustColor: [0.82, 0.62, 0.38], grime: 0.3, storm: 0.0, scratches: 0.0 },
+    liveWhen: ["storm", "scratches"],
+    controls: [
+      { key: "fade", label: "Fade", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "dust", label: "Dust tint", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "grime", label: "Grime", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "storm", label: "Dust storm", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "scratches", label: "Film scratches", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "dustColor", label: "Sky", type: "swatch", options: [
+        { name: "Dust Bowl",     value: [0.82, 0.62, 0.38] },
+        { name: "Ash",           value: [0.55, 0.53, 0.50] },
+        { name: "Nuclear Winter",value: [0.55, 0.62, 0.70] },
+        { name: "Rust",          value: [0.70, 0.35, 0.20] },
+        { name: "Sickly",        value: [0.65, 0.70, 0.35] }
+      ] }
+    ],
+    presets: [
+      { id: "wasteland", name: "Wasteland", subtitle: "sun-bleached desert dust", params: { fade: 0.50, dust: 0.45, dustColor: [0.82, 0.62, 0.38], grime: 0.30, storm: 0.0, scratches: 0.0, vignette: 0.30, contrast: 1.10 } },
+      { id: "dustStorm", name: "Dust Storm", subtitle: "sand blowing across the screen", params: { fade: 0.45, dust: 0.55, dustColor: [0.82, 0.62, 0.38], grime: 0.20, storm: 0.55, scratches: 0.0, vignette: 0.25 } },
+      { id: "ashfall", name: "Ashfall", subtitle: "grey, burnt-out and quiet", params: { fade: 0.75, dust: 0.40, dustColor: [0.55, 0.53, 0.50], grime: 0.45, storm: 0.20, scratches: 0.0, vignette: 0.35 } },
+      { id: "nuclearWinter", name: "Nuclear Winter", subtitle: "cold, washed-out blue grey", params: { fade: 0.65, dust: 0.45, dustColor: [0.55, 0.62, 0.70], grime: 0.25, storm: 0.15, scratches: 0.0, vignette: 0.30, bright: 0.95 } },
+      { id: "lastReel", name: "Last Reel", subtitle: "rusted, grainy found footage", params: { fade: 0.55, dust: 0.50, dustColor: [0.70, 0.35, 0.20], grime: 0.50, storm: 0.0, scratches: 0.50, noise: 0.10, vignette: 0.40 } }
+    ]
+  },
+  {
+    id: "matrix",
+    name: "Matrix",
+    subtitle: "Phosphor-tinted desktop behind falling code",
+    defaults: { rain: 0.35, density: 0.5, speed: 0.5, mono: 0.6, glow: 0.2, code: [0.25, 1.00, 0.35] },
+    liveWhen: ["rain"],
+    controls: [
+      { key: "rain", label: "Code rain", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "density", label: "Density", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "speed", label: "Speed", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "mono", label: "Phosphor tint", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "glow", label: "Glow", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "code", label: "Code", type: "swatch", options: [
+        { name: "Classic",  value: [0.25, 1.00, 0.35] },
+        { name: "Amber",    value: [1.00, 0.70, 0.15] },
+        { name: "Ice",      value: [0.40, 0.85, 1.00] },
+        { name: "Red Pill", value: [1.00, 0.20, 0.20] },
+        { name: "Ghost",    value: [0.85, 0.90, 0.95] }
+      ] }
+    ],
+    presets: [
+      { id: "digitalRain", name: "Digital Rain", subtitle: "the classic green cascade", params: { rain: 0.40, density: 0.55, speed: 0.50, mono: 0.70, glow: 0.25, code: [0.25, 1.00, 0.35], contrast: 1.10, vignette: 0.20 } },
+      { id: "construct", name: "The Construct", subtitle: "light drizzle, mostly readable", params: { rain: 0.18, density: 0.30, speed: 0.35, mono: 0.40, glow: 0.10, code: [0.25, 1.00, 0.35] } },
+      { id: "downpour", name: "Downpour", subtitle: "dense, fast, all-in", params: { rain: 0.60, density: 0.90, speed: 0.80, mono: 0.90, glow: 0.35, code: [0.25, 1.00, 0.35], contrast: 1.15, vignette: 0.30 } },
+      { id: "redPill", name: "Red Pill", subtitle: "red code, warning tint", params: { rain: 0.35, density: 0.50, speed: 0.55, mono: 0.60, glow: 0.25, code: [1.00, 0.20, 0.20], vignette: 0.25 } },
+      { id: "greenScreen", name: "Green Screen", subtitle: "phosphor tint only, no rain", params: { rain: 0.0, density: 0.50, speed: 0.50, mono: 0.75, glow: 0.20, code: [0.25, 1.00, 0.35] } }
+    ]
+  },
+  {
+    id: "cctv",
+    name: "Security Camera",
+    subtitle: "Grainy CCTV feed with REC, timecode and interference",
+    defaults: { mono: 0.9, lines: 0.35, soft: 0.3, interference: 0.15, overlay: true, clock: true, camTint: [0.92, 1.00, 0.95] },
+    liveWhen: ["clock", "interference"],
+    controls: [
+      { key: "mono", label: "Black & white", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "lines", label: "Scan lines", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "soft", label: "Softness", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "interference", label: "Interference", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "camTint", label: "Feed", type: "swatch", options: [
+        { name: "CCTV",         value: [0.92, 1.00, 0.95] },
+        { name: "Night Vision", value: [0.40, 1.00, 0.45] },
+        { name: "Old Tape",     value: [1.00, 0.88, 0.68] },
+        { name: "Blue Monitor", value: [0.75, 0.88, 1.00] }
+      ] },
+      { key: "overlay", label: "REC overlay", type: "toggle" },
+      { key: "clock", label: "Running timecode", type: "toggle" }
+    ],
+    presets: [
+      { id: "lobbyCam", name: "Lobby Cam", subtitle: "everyday black-and-white CCTV", params: { mono: 0.90, lines: 0.35, soft: 0.30, interference: 0.10, overlay: true, clock: true, camTint: [0.92, 1.00, 0.95], noise: 0.10, vignette: 0.30, contrast: 1.10 } },
+      { id: "nightVision", name: "Night Vision", subtitle: "bright green, noisy, after dark", params: { mono: 1.00, lines: 0.30, soft: 0.35, interference: 0.10, overlay: true, clock: true, camTint: [0.40, 1.00, 0.45], noise: 0.20, vignette: 0.55, bright: 1.25, contrast: 1.15 } },
+      { id: "parkingGarage", name: "Parking Garage", subtitle: "cheap camera, constant interference", params: { mono: 0.80, lines: 0.50, soft: 0.45, interference: 0.45, overlay: true, clock: true, camTint: [0.75, 0.88, 1.00], noise: 0.14, vignette: 0.35 } },
+      { id: "foundFootage", name: "Found Footage", subtitle: "old VHS security tape", params: { mono: 0.60, lines: 0.40, soft: 0.40, interference: 0.30, overlay: true, clock: true, camTint: [1.00, 0.88, 0.68], noise: 0.12, vignette: 0.30 } },
+      { id: "stillFrame", name: "Still Frame", subtitle: "the look with no motion, saves GPU", params: { mono: 0.90, lines: 0.35, soft: 0.30, interference: 0.0, overlay: true, clock: false, camTint: [0.92, 1.00, 0.95], noise: 0.08, vignette: 0.30 } }
     ]
   }
 ]
