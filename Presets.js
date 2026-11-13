@@ -403,6 +403,174 @@ var FAMILIES = [
       { id: "heatwave", name: "Heatwave", subtitle: "molten lava palette, rippling haze", params: {
         palette: [[0.05, 0.00, 0.00], [0.45, 0.02, 0.00], [0.85, 0.20, 0.00], [1.00, 0.55, 0.05], [1.00, 0.90, 0.40]], heat: 0.60, soft: 0.45, outline: 0.10, shimmer: 0.60, hud: false, vignette: 0.20 } }
     ]
+  },
+  {
+    id: "comic",
+    name: "Comic",
+    subtitle: "Flat cel colour, ink lines and halftone dots",
+    defaults: { levels: 4, ink: 0.7, halftone: 0.5, dotSize: 6, pop: 0.3, paper: [1.00, 1.00, 1.00] },
+    liveWhen: [],
+    controls: [
+      { key: "levels", label: "Colour bands", type: "slider", min: 2, max: 8, step: 1, dec: 0 },
+      { key: "ink", label: "Ink lines", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "halftone", label: "Halftone", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "dotSize", label: "Dot size", type: "slider", min: 3, max: 14, step: 1, dec: 0 },
+      { key: "pop", label: "Colour pop", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "paper", label: "Paper", type: "swatch", options: [
+        { name: "White",     value: [1.00, 1.00, 1.00] },
+        { name: "Newsprint", value: [1.00, 0.96, 0.86] },
+        { name: "Pulp",      value: [0.98, 0.90, 0.74] },
+        { name: "Cool",      value: [0.92, 0.96, 1.00] }
+      ] }
+    ],
+    presets: [
+      { id: "sunday", name: "Sunday Funnies", subtitle: "newsprint, bold ink, big dots", params: { levels: 4, ink: 0.75, halftone: 0.55, dotSize: 7, pop: 0.35, paper: [1.00, 0.96, 0.86] } },
+      { id: "anime", name: "Anime Cel", subtitle: "clean flat colour, thin lines, no dots", params: { levels: 5, ink: 0.55, halftone: 0.0, dotSize: 6, pop: 0.40, paper: [1.00, 1.00, 1.00], saturation: 1.10 } },
+      { id: "popArt", name: "Pop Art", subtitle: "three loud bands, giant dots", params: { levels: 3, ink: 0.85, halftone: 0.75, dotSize: 11, pop: 0.80, paper: [1.00, 1.00, 1.00], contrast: 1.10 } },
+      { id: "pulp", name: "Pulp Comic", subtitle: "yellowed paper, heavy ink", params: { levels: 4, ink: 0.90, halftone: 0.40, dotSize: 5, pop: 0.20, paper: [0.98, 0.90, 0.74], noise: 0.05, vignette: 0.20 } },
+      { id: "graphicNovel", name: "Graphic Novel", subtitle: "muted bands, fine screen", params: { levels: 6, ink: 0.65, halftone: 0.35, dotSize: 4, pop: 0.0, paper: [0.92, 0.96, 1.00], saturation: 0.75, contrast: 1.10 } }
+    ]
+  },
+  {
+    id: "blueprint",
+    name: "Blueprint",
+    subtitle: "Drafting paper, white line art and a grid",
+    defaults: { lines: 0.7, fill: 0.4, grid: 0.5, wear: 0.0, scheme: [[0.06, 0.24, 0.52], [0.92, 0.96, 1.00]] },
+    liveWhen: [],
+    controls: [
+      { key: "lines", label: "Line weight", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "fill", label: "Fill", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "grid", label: "Grid", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "wear", label: "Paper wear", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "scheme", label: "Paper", type: "swatch", options: [
+        { name: "Classic",    value: [[0.06, 0.24, 0.52], [0.92, 0.96, 1.00]] },
+        { name: "Cyanotype",  value: [[0.03, 0.18, 0.38], [0.85, 0.93, 1.00]] },
+        { name: "Whiteprint", value: [[0.95, 0.96, 0.98], [0.10, 0.25, 0.60]] },
+        { name: "Night Draft", value: [[0.03, 0.06, 0.12], [0.35, 0.85, 1.00]] },
+        { name: "Sepia Plan", value: [[0.93, 0.87, 0.74], [0.35, 0.20, 0.10]] }
+      ] }
+    ],
+    presets: [
+      { id: "classic", name: "Classic", subtitle: "white lines on drafting blue", params: { lines: 0.70, fill: 0.40, grid: 0.50, wear: 0.0, scheme: [[0.06, 0.24, 0.52], [0.92, 0.96, 1.00]] } },
+      { id: "cyanotype", name: "Cyanotype", subtitle: "deep prussian blue, worn paper", params: { lines: 0.65, fill: 0.50, grid: 0.25, wear: 0.50, scheme: [[0.03, 0.18, 0.38], [0.85, 0.93, 1.00]], vignette: 0.25 } },
+      { id: "whiteprint", name: "Whiteprint", subtitle: "blue lines on white, like a diazo copy", params: { lines: 0.75, fill: 0.35, grid: 0.40, wear: 0.10, scheme: [[0.95, 0.96, 0.98], [0.10, 0.25, 0.60]] } },
+      { id: "nightDraft", name: "Night Draft", subtitle: "glowing cyan lines on near-black", params: { lines: 0.80, fill: 0.30, grid: 0.35, wear: 0.0, scheme: [[0.03, 0.06, 0.12], [0.35, 0.85, 1.00]] } },
+      { id: "patent", name: "Patent Office", subtitle: "brown ink on aged paper, no grid", params: { lines: 0.70, fill: 0.45, grid: 0.0, wear: 0.60, scheme: [[0.93, 0.87, 0.74], [0.35, 0.20, 0.10]], vignette: 0.20 } }
+    ]
+  },
+  {
+    id: "sepia",
+    name: "Sepia Film",
+    subtitle: "A 1920s silent-film print, flicker and all",
+    defaults: { tone: 1.0, flicker: 0.0, weave: 0.0, burn: 0.3, scratch: 0.0, dust: 0.0, tint: [1.07, 0.88, 0.66] },
+    liveWhen: ["flicker", "weave", "scratch", "dust"],
+    controls: [
+      { key: "tone", label: "Toning", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "flicker", label: "Projector flicker", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "weave", label: "Gate weave", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "burn", label: "Burned edges", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "scratch", label: "Scratches", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "dust", label: "Dust", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "tint", label: "Film stock", type: "swatch", options: [
+        { name: "Sepia",    value: [1.07, 0.88, 0.66] },
+        { name: "Selenium", value: [1.00, 0.94, 0.92] },
+        { name: "Amber",    value: [1.12, 0.92, 0.55] },
+        { name: "Night Tint", value: [0.70, 0.85, 1.10] },
+        { name: "Rose",     value: [1.10, 0.85, 0.85] }
+      ] }
+    ],
+    presets: [
+      { id: "nickelodeon", name: "Nickelodeon", subtitle: "flickering, scratched, the full show", params: { tone: 1.0, flicker: 0.60, weave: 0.60, burn: 0.45, scratch: 0.50, dust: 0.50, tint: [1.07, 0.88, 0.66], noise: 0.12, contrast: 1.10 } },
+      { id: "oldPhotograph", name: "Old Photograph", subtitle: "still sepia print, burned corners", params: { tone: 1.0, flicker: 0.0, weave: 0.0, burn: 0.55, scratch: 0.0, dust: 0.0, tint: [1.07, 0.88, 0.66], noise: 0.08 } },
+      { id: "restored", name: "Restored Print", subtitle: "clean toning, a gentle flicker", params: { tone: 0.85, flicker: 0.25, weave: 0.20, burn: 0.15, scratch: 0.0, dust: 0.10, tint: [1.00, 0.94, 0.92], noise: 0.06 } },
+      { id: "dayForNight", name: "Day for Night", subtitle: "blue-tinted night scene", params: { tone: 1.0, flicker: 0.35, weave: 0.30, burn: 0.35, scratch: 0.25, dust: 0.25, tint: [0.70, 0.85, 1.10], noise: 0.10, bright: 0.90 } },
+      { id: "goldRush", name: "Gold Rush", subtitle: "amber stock, heavy wear", params: { tone: 1.0, flicker: 0.50, weave: 0.40, burn: 0.60, scratch: 0.70, dust: 0.70, tint: [1.12, 0.92, 0.55], noise: 0.14, vignette: 0.20 } }
+    ]
+  },
+  {
+    id: "infrared",
+    name: "Infrared",
+    subtitle: "False-colour IR film: pink foliage and glowing highlights",
+    defaults: { swap: 1.0, foliage: 0.6, glow: 0.4, mono: 0.0, tint: [1.00, 0.92, 0.95] },
+    liveWhen: [],
+    controls: [
+      { key: "swap", label: "Colour shift", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "foliage", label: "Foliage glow", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "glow", label: "Halation", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "mono", label: "Black and white", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "tint", label: "Mono tint", type: "swatch", options: [
+        { name: "Blush",  value: [1.00, 0.92, 0.95] },
+        { name: "Neutral", value: [1.00, 1.00, 1.00] },
+        { name: "Ice",    value: [0.88, 0.96, 1.05] },
+        { name: "Gold",   value: [1.08, 0.98, 0.80] },
+        { name: "Violet", value: [0.95, 0.85, 1.08] }
+      ] }
+    ],
+    presets: [
+      { id: "aerochrome", name: "Aerochrome", subtitle: "hot pink foliage, deep cyan skies", params: { swap: 1.0, foliage: 0.70, glow: 0.40, mono: 0.0, saturation: 1.20 } },
+      { id: "dreamland", name: "Dreamland", subtitle: "softer swap, strong halation", params: { swap: 0.75, foliage: 0.55, glow: 0.80, mono: 0.0, saturation: 1.05, bright: 1.05 } },
+      { id: "woodEffect", name: "Wood Effect", subtitle: "black-and-white IR, white leaves", params: { swap: 1.0, foliage: 0.80, glow: 0.55, mono: 1.0, tint: [1.00, 1.00, 1.00], contrast: 1.15, vignette: 0.30 } },
+      { id: "frost", name: "Frost", subtitle: "icy mono infrared", params: { swap: 1.0, foliage: 0.60, glow: 0.45, mono: 0.85, tint: [0.88, 0.96, 1.05], vignette: 0.20 } },
+      { id: "surreal", name: "Surreal", subtitle: "full swap, violet glow", params: { swap: 1.0, foliage: 1.0, glow: 0.60, mono: 0.25, tint: [0.95, 0.85, 1.08], saturation: 1.35, contrast: 1.05 } }
+    ]
+  },
+  {
+    id: "golden",
+    name: "Golden Hour",
+    subtitle: "Low sun glowing in from the top, warm and soft",
+    defaults: { warmth: 0.5, glow: 0.5, bloom: 0.3, haze: 0.2, flare: 0.0, sunX: 0.85, sky: [1.00, 0.62, 0.28] },
+    liveWhen: [],
+    controls: [
+      { key: "warmth", label: "Warmth", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "glow", label: "Sunlight", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "bloom", label: "Bloom", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "haze", label: "Haze", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "flare", label: "Lens flare", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "sunX", label: "Sun position", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "sky", label: "Sky", type: "swatch", options: [
+        { name: "Sunset",  value: [1.00, 0.62, 0.28] },
+        { name: "Golden",  value: [1.00, 0.78, 0.35] },
+        { name: "Rose",    value: [1.00, 0.55, 0.55] },
+        { name: "Dusk",    value: [0.85, 0.45, 0.80] },
+        { name: "Desert",  value: [1.00, 0.45, 0.18] }
+      ] }
+    ],
+    presets: [
+      { id: "lateAfternoon", name: "Late Afternoon", subtitle: "warm light from the top right", params: { warmth: 0.45, glow: 0.45, bloom: 0.25, haze: 0.15, flare: 0.0, sunX: 0.85, sky: [1.00, 0.78, 0.35] } },
+      { id: "sunset", name: "Sunset", subtitle: "orange glow, a touch of flare", params: { warmth: 0.60, glow: 0.65, bloom: 0.35, haze: 0.25, flare: 0.40, sunX: 0.80, sky: [1.00, 0.62, 0.28], vignette: 0.15 } },
+      { id: "magicHour", name: "Magic Hour", subtitle: "pink and soft, from the left", params: { warmth: 0.40, glow: 0.55, bloom: 0.50, haze: 0.35, flare: 0.0, sunX: 0.12, sky: [1.00, 0.55, 0.55], saturation: 1.05 } },
+      { id: "dusk", name: "Dusk", subtitle: "violet sky, sun almost gone", params: { warmth: 0.35, glow: 0.45, bloom: 0.20, haze: 0.40, flare: 0.0, sunX: 0.50, sky: [0.85, 0.45, 0.80], bright: 0.92, vignette: 0.30 } },
+      { id: "desertSun", name: "Desert Sun", subtitle: "fierce, hazy, flaring", params: { warmth: 0.75, glow: 0.75, bloom: 0.45, haze: 0.50, flare: 0.65, sunX: 0.65, sky: [1.00, 0.45, 0.18], contrast: 1.05, saturation: 0.90 } }
+    ]
+  },
+  {
+    id: "hologram",
+    name: "Hologram",
+    subtitle: "See-through projection with scan bands and flicker",
+    defaults: { holo: 0.8, scan: 0.0, flicker: 0.0, split: 0.3, glitch: 0.0, tint: [0.35, 0.90, 1.00] },
+    liveWhen: ["scan", "flicker", "glitch"],
+    controls: [
+      { key: "holo", label: "Projection", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "scan", label: "Scan band", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "flicker", label: "Flicker", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "split", label: "Colour split", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "glitch", label: "Glitch", type: "slider", min: 0, max: 1, step: 0.01, dec: 2 },
+      { key: "tint", label: "Beam", type: "swatch", options: [
+        { name: "Cyan",    value: [0.35, 0.90, 1.00] },
+        { name: "Blue",    value: [0.35, 0.60, 1.00] },
+        { name: "Green",   value: [0.40, 1.00, 0.55] },
+        { name: "Magenta", value: [1.00, 0.40, 0.90] },
+        { name: "Amber",   value: [1.00, 0.70, 0.30] }
+      ] }
+    ],
+    presets: [
+      { id: "transmission", name: "Transmission", subtitle: "flickering blue message, rolling band", params: { holo: 0.85, scan: 0.60, flicker: 0.45, split: 0.40, glitch: 0.30, tint: [0.35, 0.60, 1.00], vignette: 0.25 } },
+      { id: "starshipHud", name: "Starship HUD", subtitle: "steady cyan, a slow scan", params: { holo: 0.75, scan: 0.40, flicker: 0.0, split: 0.25, glitch: 0.0, tint: [0.35, 0.90, 1.00] } },
+      { id: "staticHolo", name: "Still Projection", subtitle: "no motion, just the look", params: { holo: 0.80, scan: 0.0, flicker: 0.0, split: 0.35, glitch: 0.0, tint: [0.35, 0.90, 1.00] } },
+      { id: "corrupted", name: "Corrupted", subtitle: "magenta, tearing and stuttering", params: { holo: 0.85, scan: 0.50, flicker: 0.70, split: 0.80, glitch: 0.85, tint: [1.00, 0.40, 0.90], noise: 0.10 } },
+      { id: "greenGrid", name: "Green Grid", subtitle: "faint green overlay, keeps some colour", params: { holo: 0.55, scan: 0.30, flicker: 0.15, split: 0.20, glitch: 0.0, tint: [0.40, 1.00, 0.55] } }
+    ]
+
   }
 ]
 

@@ -1,7 +1,7 @@
 # Moodscreen
 
 A plugin for the [Omarchy](https://omarchy.org/) shell that lays a
-full-screen mood shader over the whole desktop. It has fourteen families, each
+full-screen mood shader over the whole desktop. It has twenty families, each
 with its own presets and sliders:
 
 - **Glass**: frosted, rippled or stained glass
@@ -18,6 +18,12 @@ with its own presets and sliders:
 - **Security Camera**: grainy CCTV with scan lines, interference, `REC` and a running timecode
 - **Noir**: hard black and white with venetian-blind shadows, a spotlight and smoke
 - **Thermal**: heat-camera false colour (Ironbow, Rainbow, White/Black Hot…) with an optional crosshair HUD
+- **Comic**: flat cel colour, ink outlines and halftone dots (Sunday Funnies, Anime Cel, Pop Art…)
+- **Blueprint**: white line art on drafting blue, with a grid (Cyanotype, Whiteprint, Night Draft…)
+- **Sepia Film**: a 1920s silent-film print with projector flicker, gate weave, scratches and dust
+- **Infrared**: false-colour IR film (Aerochrome pinks) or black-and-white IR with glowing highlights
+- **Golden Hour**: low sun glowing in from the top edge, warm grade, bloom and lens flare
+- **Hologram**: see-through single-colour projection with scan bands, flicker, colour split and glitches
 
 ## Install
 

@@ -782,6 +782,312 @@ function thermalEffect(p, timed) {
   return { consts: consts, body: body }
 }
 
+// Comic / Cel: flat posterized colour, halftone dots in the shadows, ink lines.
+function comicEffect(p, timed) {
+  var levels = Math.round(clamp(p.levels, 2, 8))
+  var ink = clamp(p.ink, 0.0, 1.0)
+  var halftone = clamp(p.halftone, 0.0, 1.0)
+  var dotSize = clamp(p.dotSize, 3, 14)
+  var pop = clamp(p.pop, 0.0, 1.0)
+  var paper = p.paper || [1.0, 1.0, 1.0]
+
+  var consts = ""
+  consts += "const float LEVELS = " + f(levels) + ";\n"
+  consts += "const float INK = " + f(ink) + ";\n"
+  consts += "const float HALFTONE = " + f(halftone) + ";\n"
+  consts += "const float DOT = " + f(dotSize) + ";\n"
+  consts += "const float POP = " + f(pop) + ";\n"
+  consts += "const vec3  PAPER = " + vec3(paper) + ";\n"
+  consts += "const vec3  INKCOL = vec3(0.05, 0.04, 0.07);\n"
+
+  var body = ""
+  body += "  vec3 base = texture(tex, uv0).rgb;\n"
+  body += "  float lv = luma1(base);\n"
+  body += "  vec3 popped = clamp(mix(vec3(lv), base, 1.0 + POP), 0.0, 1.0);\n"
+  // Band the brightness, not each channel: per-channel rounding tints near-greys
+  // (a dark terminal turns teal). A little of the original survives so dim
+  // text never lands in the same band as its background.
+  body += "  float ql = floor(lv * LEVELS + 0.5) / LEVELS;\n"
+  body += "  vec3 col = clamp(popped * (ql / max(lv, 0.02)), 0.0, 1.0);\n"
+  body += "  col = mix(col, popped, 0.18);\n"
+  body += "  col *= PAPER;\n"
+  if (halftone > 0.0) {
+    // Dots on a 45-degree screen, growing as the picture darkens; whites stay clean.
+    body += "  float osc = max(1.0, res.y / 1080.0);\n"
+    body += "  vec2 hp = uv0 * res;\n"
+    body += "  vec2 rp = vec2(hp.x + hp.y, hp.y - hp.x) * 0.70711;\n"
+    body += "  vec2 cell = fract(rp / (DOT * osc)) - 0.5;\n"
+    body += "  float dr = sqrt(clamp(1.0 - lv, 0.0, 1.0)) * 0.62;\n"
+    body += "  float dotm = smoothstep(dr + 0.07, dr - 0.07, length(cell));\n"
+    body += "  col *= 1.0 - HALFTONE * 0.5 * dotm * smoothstep(0.88, 0.30, lv);\n"
+  }
+  if (ink > 0.0) {
+    body += EDGE_BODY
+    // Ink goes on the darker side of an edge, so light text on a dark
+    // background keeps its strokes and gains an outline instead of losing them.
+    body += "  float nbl = (luma1(texture(tex, uv0 + vec2(eo.x, 0.0)).rgb) + luma1(texture(tex, uv0 - vec2(eo.x, 0.0)).rgb)\n"
+    body += "            + luma1(texture(tex, uv0 + vec2(0.0, eo.y)).rgb) + luma1(texture(tex, uv0 - vec2(0.0, eo.y)).rgb)) * 0.25;\n"
+    body += "  float darkSide = lv <= nbl + 0.01 ? 1.0 : 0.3;\n"
+    body += "  col = mix(col, INKCOL, smoothstep(0.15, 0.50, edge) * darkSide * INK);\n"
+  }
+  return { consts: consts, body: body }
+}
+
+// Blueprint: drafting paper in a single ink, line art from the picture's edges, a grid.
+function blueprintEffect(p, timed) {
+  var lines = clamp(p.lines, 0.0, 1.0)
+  var fill = clamp(p.fill, 0.0, 1.0)
+  var grid = clamp(p.grid, 0.0, 1.0)
+  var wear = clamp(p.wear, 0.0, 1.0)
+  var scheme = p.scheme || [[0.06, 0.24, 0.52], [0.92, 0.96, 1.00]]
+
+  var consts = ""
+  consts += "const float LINES = " + f(lines) + ";\n"
+  consts += "const float FILL = " + f(fill) + ";\n"
+  consts += "const float GRID = " + f(grid) + ";\n"
+  consts += "const float WEAR = " + f(wear) + ";\n"
+  consts += "const vec3  BPAPER = " + vec3(scheme[0]) + ";\n"
+  consts += "const vec3  BLINE = " + vec3(scheme[scheme.length - 1]) + ";\n"
+  if (wear > 0.0) consts += NOISE_FNS
+
+  var body = ""
+  body += "  vec3 base = texture(tex, uv0).rgb;\n"
+  body += "  float lv = luma1(base);\n"
+  body += EDGE_BODY
+  body += "  float osc = max(1.0, res.y / 1080.0);\n"
+  body += "  vec2 px = uv0 * res;\n"
+  body += "  vec3 col = BPAPER;\n"
+  // Dark content is drawn in, faintly; edges are the linework.
+  body += "  col = mix(col, BLINE, FILL * 0.45 * (1.0 - lv));\n"
+  if (grid > 0.0) {
+    body += "  float gs = 24.0 * osc;\n"
+    body += "  vec2 gm = abs(fract(px / gs + 0.5) - 0.5) * gs;\n"
+    body += "  vec2 gM = abs(fract(px / (gs * 5.0) + 0.5) - 0.5) * gs * 5.0;\n"
+    body += "  float minor = 1.0 - smoothstep(0.4 * osc, 0.9 * osc, min(gm.x, gm.y));\n"
+    body += "  float major = 1.0 - smoothstep(0.7 * osc, 1.3 * osc, min(gM.x, gM.y));\n"
+    body += "  col = mix(col, BLINE, GRID * max(minor * 0.16, major * 0.32));\n"
+  }
+  if (wear > 0.0) {
+    body += "  float blot = mNoise(px / (170.0 * osc)) * 0.7 + mNoise(px / (60.0 * osc)) * 0.3;\n"
+    body += "  col = mix(col, col * 0.82 + BLINE * 0.06, WEAR * smoothstep(0.45, 0.9, blot));\n"
+    body += "  col += WEAR * 0.05 * (mHash(floor(px / osc)) - 0.5);\n"
+  }
+  body += "  col = mix(col, BLINE, clamp(smoothstep(0.06, 0.40, edge) * (0.35 + LINES * 0.75), 0.0, 1.0));\n"
+  return { consts: consts, body: body }
+}
+
+// Sepia Film: a 1920s print — toned monochrome, projector flicker, gate weave,
+// scratches, dust and a burned, uneven vignette.
+function sepiaEffect(p, timed) {
+  var tone = clamp(p.tone, 0.0, 1.0)
+  var flicker = clamp(p.flicker, 0.0, 1.0)
+  var weave = clamp(p.weave, 0.0, 1.0)
+  var burn = clamp(p.burn, 0.0, 1.0)
+  var scratch = clamp(p.scratch, 0.0, 1.0)
+  var dust = clamp(p.dust, 0.0, 1.0)
+  var tint = p.tint || [1.07, 0.88, 0.66]
+  var t = timed ? "time" : "0.0"
+
+  var consts = ""
+  consts += "const float TONE = " + f(tone) + ";\n"
+  consts += "const float FLICKER = " + f(flicker) + ";\n"
+  consts += "const float WEAVE = " + f(weave) + ";\n"
+  consts += "const float BURN = " + f(burn) + ";\n"
+  consts += "const float SCRATCH = " + f(scratch) + ";\n"
+  consts += "const float DUST = " + f(dust) + ";\n"
+  consts += "const vec3  STINT = " + vec3(tint) + ";\n"
+  consts += NOISE_FNS
+
+  var body = ""
+  body += "  float st = " + t + ";\n"
+  body += "  float osc = max(1.0, res.y / 1080.0);\n"
+  body += "  vec2 suv = uv0;\n"
+  if (weave > 0.0 && timed) {
+    // Gate weave: the frame drifts by under two texels.
+    body += "  suv += texel * WEAVE * vec2(sin(st * 7.3) * 0.9 + sin(st * 13.1) * 0.4, sin(st * 5.7) * 0.6);\n"
+  }
+  body += "  vec3 base = texture(tex, suv).rgb;\n"
+  body += "  float lv = luma1(base);\n"
+  body += "  vec3 col = mix(base, clamp(vec3(lv) * STINT, 0.0, 1.0), TONE);\n"
+  if (flicker > 0.0 && timed) {
+    body += "  col *= 1.0 + FLICKER * 0.14 * (mHash(vec2(floor(st * 18.0), 3.1)) - 0.5);\n"
+  }
+  if (burn > 0.0) {
+    body += "  vec2 bc = uv0 * 2.0 - 1.0;\n"
+    body += "  float bn = mNoise(uv0 * vec2(aspect, 1.0) * 3.5) * 0.7 + mNoise(uv0 * vec2(aspect, 1.0) * 9.0) * 0.3;\n"
+    body += "  float bm = smoothstep(0.80, 1.45, length(bc * vec2(0.92, 1.0)) + (bn - 0.5) * 0.45);\n"
+    body += "  col = mix(col, col * vec3(0.45, 0.28, 0.14), BURN * bm);\n"
+    body += "  col *= 1.0 - BURN * 0.55 * bm * bm;\n"
+  }
+  if (scratch > 0.0) {
+    // A few vertical scratches that jump every few frames.
+    body += "  float sseed = floor(st * 6.0);\n"
+    body += "  for (int i = 0; i < 3; i++) {\n"
+    body += "    float fi = float(i);\n"
+    body += "    float xs = mHash(vec2(fi * 7.7, sseed + 1.3));\n"
+    body += "    float on = step(0.45, mHash(vec2(sseed * 1.7, fi + 7.0)));\n"
+    body += "    float sd = abs(uv0.x - xs) * res.x;\n"
+    body += "    float along = 0.6 + 0.4 * mNoise(vec2(fi * 3.0, uv0.y * 9.0 + sseed));\n"
+    body += "    col = mix(col, vec3(0.95, 0.90, 0.80), SCRATCH * 0.55 * on * along * smoothstep(1.3 * osc, 0.0, sd));\n"
+    body += "  }\n"
+  }
+  if (dust > 0.0) {
+    body += "  float dseed = floor(st * 12.0);\n"
+    body += "  vec2 dp = uv0 * vec2(aspect, 1.0) * 28.0;\n"
+    body += "  vec2 di = floor(dp);\n"
+    body += "  float dh = mHash(di + vec2(dseed * 1.7, dseed * 0.3));\n"
+    body += "  float dd = length(fract(dp) - vec2(mHash(di + 3.1 + dseed), mHash(di + 5.3 + dseed)));\n"
+    body += "  float speck = step(0.982, dh) * smoothstep(0.09, 0.03, dd);\n"
+    body += "  col = mix(col, vec3(0.07, 0.05, 0.03), speck * DUST);\n"
+  }
+  return { consts: consts, body: body }
+}
+
+// Infrared: false-colour IR film (Aerochrome) — foliage turns pink and red, with
+// a halation glow round the highlights, or black-and-white IR with white foliage.
+function infraredEffect(p, timed) {
+  var swap = clamp(p.swap, 0.0, 1.0)
+  var foliage = clamp(p.foliage, 0.0, 1.0)
+  var glow = clamp(p.glow, 0.0, 1.0)
+  var mono = clamp(p.mono, 0.0, 1.0)
+  var tint = p.tint || [1.0, 0.92, 0.95]
+
+  var consts = ""
+  consts += "const float SWAP = " + f(swap) + ";\n"
+  consts += "const float FOLIAGE = " + f(foliage) + ";\n"
+  consts += "const float IRGLOW = " + f(glow) + ";\n"
+  consts += "const float MONO = " + f(mono) + ";\n"
+  consts += "const vec3  IRTINT = " + vec3(tint) + ";\n"
+  // Infrared proxy: green things (leaves) reflect IR strongly, blue barely.
+  // Normalised so a neutral grey keeps its own brightness: only colour casts move.
+  consts += "float irOf(vec3 c) { return clamp((c.g * (0.85 + FOLIAGE * 0.8) + dot(c, vec3(0.2126, 0.7152, 0.0722)) * 0.25 - c.b * 0.25 * FOLIAGE)\n"
+  consts += "  / (1.10 + FOLIAGE * 0.55), 0.0, 1.0); }\n"
+
+  var body = ""
+  body += "  vec3 c0 = texture(tex, uv0).rgb;\n"
+  body += "  float ir = irOf(c0);\n"
+  // The film's layer shift: IR records as red, red as green, green as blue.
+  body += "  vec3 col = mix(c0, vec3(ir, c0.r, c0.g), SWAP);\n"
+  if (mono > 0.0) body += "  col = mix(col, vec3(clamp(ir * 1.1, 0.0, 1.0)) * IRTINT, MONO);\n"
+  if (glow > 0.0) {
+    body += "  vec2 go = texel * 2.5;\n"
+    body += "  float gir = (irOf(texture(tex, uv0 + vec2(go.x, go.y)).rgb) + irOf(texture(tex, uv0 + vec2(-go.x, go.y)).rgb)\n"
+    body += "            + irOf(texture(tex, uv0 + vec2(go.x, -go.y)).rgb) + irOf(texture(tex, uv0 - go).rgb)) * 0.25;\n"
+    body += "  vec3 halo = mix(vec3(1.0, 0.55, 0.65), IRTINT, MONO);\n"
+    body += "  col += IRGLOW * 0.55 * halo * pow(max(gir - 0.55, 0.0) * 2.2, 1.4);\n"
+  }
+  return { consts: consts, body: body }
+}
+
+// Golden Hour: low sun glowing in from the top edge, warm grade, soft bloom,
+// a little lens flare. Entirely static.
+function goldenEffect(p, timed) {
+  var warmth = clamp(p.warmth, 0.0, 1.0)
+  var glow = clamp(p.glow, 0.0, 1.0)
+  var bloom = clamp(p.bloom, 0.0, 1.0)
+  var haze = clamp(p.haze, 0.0, 1.0)
+  var flare = clamp(p.flare, 0.0, 1.0)
+  var sunX = clamp(p.sunX, 0.0, 1.0)
+  var sky = p.sky || [1.00, 0.62, 0.28]
+
+  var consts = ""
+  consts += "const float WARMTH = " + f(warmth) + ";\n"
+  consts += "const float GLOW = " + f(glow) + ";\n"
+  consts += "const float BLOOM = " + f(bloom) + ";\n"
+  consts += "const float HAZE = " + f(haze) + ";\n"
+  consts += "const float FLARE = " + f(flare) + ";\n"
+  consts += "const vec2  SUN = vec2(" + f(sunX) + ", -0.06);\n"
+  consts += "const vec3  SKY = " + vec3(sky) + ";\n"
+
+  var body = ""
+  body += "  vec3 col = texture(tex, uv0).rgb;\n"
+  if (bloom > 0.0) {
+    body += "  vec2 bo = texel * 2.5;\n"
+    body += "  vec3 bb = (texture(tex, uv0 + vec2(bo.x, 0.0)).rgb + texture(tex, uv0 - vec2(bo.x, 0.0)).rgb\n"
+    body += "          + texture(tex, uv0 + vec2(0.0, bo.y)).rgb + texture(tex, uv0 - vec2(0.0, bo.y)).rgb\n"
+    body += "          + texture(tex, uv0 + bo).rgb + texture(tex, uv0 - bo).rgb\n"
+    body += "          + texture(tex, uv0 + vec2(bo.x, -bo.y)).rgb + texture(tex, uv0 + vec2(-bo.x, bo.y)).rgb) * 0.125;\n"
+    body += "  col += BLOOM * 0.5 * mix(vec3(1.0), SKY, 0.6) * max(bb - 0.6, 0.0) * 2.5;\n"
+  }
+  body += "  float lv = luma1(col);\n"
+  // Warm highlights, faintly violet shadows.
+  body += "  col = mix(col, col * vec3(1.10, 0.97, 0.80), WARMTH);\n"
+  body += "  col += WARMTH * 0.05 * vec3(0.30, 0.05, 0.28) * (1.0 - lv);\n"
+  body += "  float sd = length((uv0 - SUN) * vec2(aspect, 1.0));\n"
+  body += "  float sg = smoothstep(1.7, 0.0, sd);\n"
+  body += "  sg *= sg;\n"
+  // Screen-blend the sunlight in, so it lifts the picture rather than covering it.
+  body += "  col = 1.0 - (1.0 - col) * (1.0 - SKY * GLOW * 0.8 * sg);\n"
+  if (haze > 0.0) body += "  col = max(col, SKY * HAZE * (0.08 + 0.10 * sg));\n"
+  if (flare > 0.0) {
+    body += "  vec2 fdir = vec2(0.5, 0.5) - SUN;\n"
+    body += "  float fl = 0.0;\n"
+    body += "  fl += smoothstep(0.10, 0.06, length((uv0 - (SUN + fdir * 0.70)) * vec2(aspect, 1.0)));\n"
+    body += "  fl += 0.6 * smoothstep(0.05, 0.02, length((uv0 - (SUN + fdir * 1.15)) * vec2(aspect, 1.0)));\n"
+    body += "  fl += 0.8 * smoothstep(0.16, 0.12, length((uv0 - (SUN + fdir * 1.55)) * vec2(aspect, 1.0)));\n"
+    body += "  col += FLARE * 0.07 * SKY * fl;\n"
+  }
+  return { consts: consts, body: body }
+}
+
+// Hologram: the desktop as a see-through projection in one colour — scan lines,
+// a rolling scan band, flicker, a slight colour split and the odd tear.
+function hologramEffect(p, timed) {
+  var holo = clamp(p.holo, 0.0, 1.0)
+  var scan = clamp(p.scan, 0.0, 1.0)
+  var flicker = clamp(p.flicker, 0.0, 1.0)
+  var split = clamp(p.split, 0.0, 1.0)
+  var glitch = clamp(p.glitch, 0.0, 1.0)
+  var tint = p.tint || [0.35, 0.90, 1.00]
+  var t = timed ? "time" : "0.0"
+
+  var consts = ""
+  consts += "const float HOLO = " + f(holo) + ";\n"
+  consts += "const float HSCAN = " + f(scan) + ";\n"
+  consts += "const float HFLICKER = " + f(flicker) + ";\n"
+  consts += "const float SPLIT = " + f(split) + ";\n"
+  consts += "const float GLITCH = " + f(glitch) + ";\n"
+  consts += "const vec3  HTINT = " + vec3(tint) + ";\n"
+  consts += NOISE_FNS
+
+  var body = ""
+  body += "  float ht = " + t + ";\n"
+  body += "  float osc = max(1.0, res.y / 1080.0);\n"
+  body += "  vec2 suv = uv0;\n"
+  if (glitch > 0.0 && timed) {
+    // Now and then a band tears sideways by up to three texels.
+    body += "  float gseed = floor(ht * 8.0);\n"
+    body += "  float gband = floor(uv0.y * 24.0);\n"
+    body += "  float tear = step(0.93, mHash(vec2(gband, gseed))) * GLITCH;\n"
+    body += "  suv.x += tear * (mHash(vec2(gseed, gband + 1.0)) - 0.5) * 6.0 * texel.x;\n"
+  }
+  body += "  vec3 c0 = texture(tex, suv).rgb;\n"
+  body += "  float lv = luma1(c0);\n"
+  body += EDGE_BODY
+  // Edges glow only where the surroundings are dark: on a light window the glow
+  // would wash out dark text rather than outline it.
+  body += "  float nbl = (luma1(texture(tex, uv0 + vec2(eo.x, 0.0)).rgb) + luma1(texture(tex, uv0 - vec2(eo.x, 0.0)).rgb)\n"
+  body += "            + luma1(texture(tex, uv0 + vec2(0.0, eo.y)).rgb) + luma1(texture(tex, uv0 - vec2(0.0, eo.y)).rgb)) * 0.25;\n"
+  body += "  vec3 hc = HTINT * (0.12 + lv * 0.95) + HTINT * edge * 0.7 * smoothstep(0.65, 0.25, nbl) + vec3(pow(lv, 4.0) * 0.25);\n"
+  if (split > 0.0) {
+    body += "  vec2 so = vec2(SPLIT * 2.0 * texel.x, 0.0);\n"
+    body += "  float lr = luma1(texture(tex, suv + so).rgb);\n"
+    body += "  float lb = luma1(texture(tex, suv - so).rgb);\n"
+    body += "  hc += vec3(1.0, 0.25, 0.45) * max(lr - lv, 0.0) * SPLIT + vec3(0.25, 0.55, 1.0) * max(lb - lv, 0.0) * SPLIT;\n"
+  }
+  // Fine projector lines, every other pixel row.
+  body += "  hc *= 1.0 - 0.16 * (0.5 + 0.5 * sin(uv0.y * res.y * 3.14159 / osc));\n"
+  if (scan > 0.0) {
+    body += "  float sb = fract(uv0.y * 0.8 - ht * 0.12);\n"
+    body += "  hc += HTINT * HSCAN * (0.28 * smoothstep(0.035, 0.0, abs(sb - 0.5)) + 0.06 * smoothstep(0.25, 0.0, abs(sb - 0.5)));\n"
+  }
+  if (flicker > 0.0 && timed) {
+    body += "  hc *= 1.0 - HFLICKER * (0.18 * step(0.92, mHash(vec2(floor(ht * 20.0), 1.0))) + 0.04 * sin(ht * 47.0));\n"
+  }
+  body += "  vec3 col = mix(c0, hc, HOLO);\n"
+  return { consts: consts, body: body }
+}
+
 var EFFECTS = {
   glass: glassEffect,
   neon: neonEffect,
@@ -796,7 +1102,13 @@ var EFFECTS = {
   matrix: matrixEffect,
   cctv: cctvEffect,
   noir: noirEffect,
-  thermal: thermalEffect
+  thermal: thermalEffect,
+  comic: comicEffect,
+  blueprint: blueprintEffect,
+  sepia: sepiaEffect,
+  infrared: infraredEffect,
+  golden: goldenEffect,
+  hologram: hologramEffect
 }
 
 // mode: "static" | "live". Live declares `time`; static never does (see
