@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 import "Presets.js" as Presets
 
@@ -13,8 +14,8 @@ Panel {
   property var hostWidget: null
   property var svc: null
   readonly property var barIdentity: hostWidget || root
-  readonly property color foreground: bar ? bar.foreground : Color.foreground
-  readonly property color accent: Color.accent
+  readonly property color foreground: bar ? bar.foreground : Commons.Color.foreground
+  readonly property color accent: Commons.Color.accent
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
 
   readonly property var families: Presets.FAMILIES
@@ -94,7 +95,7 @@ Panel {
       anchors.leftMargin: Style.space(5)
       anchors.verticalCenter: parent.verticalCenter
       text: disc.label
-      foreground: disc.ui ? disc.ui.foreground : Color.foreground
+      foreground: disc.ui ? disc.ui.foreground : Commons.Color.foreground
       fontFamily: disc.ui ? disc.ui.fontFamily : Style.font.family
     }
 
@@ -126,7 +127,7 @@ Panel {
       id: tabLabel
       anchors.centerIn: parent
       text: tab.label
-      color: tab.ui ? tab.ui.foreground : Color.foreground
+      color: tab.ui ? tab.ui.foreground : Commons.Color.foreground
       font.family: tab.ui ? tab.ui.fontFamily : Style.font.family
       font.pixelSize: Style.font.caption
     }
@@ -164,7 +165,7 @@ Panel {
       Text {
         id: lookName
         text: look.modelData.name
-        color: look.ui ? look.ui.foreground : Color.foreground
+        color: look.ui ? look.ui.foreground : Commons.Color.foreground
         font.family: look.ui ? look.ui.fontFamily : Style.font.family
         font.pixelSize: Style.font.body
       }
@@ -193,7 +194,7 @@ Panel {
     id: btn
     property var ui
     property string label: ""
-    property color labelColor: ui ? ui.foreground : Color.foreground
+    property color labelColor: ui ? ui.foreground : Commons.Color.foreground
     signal clicked()
 
     height: btnLabel.implicitHeight + Style.space(10)
@@ -264,7 +265,7 @@ Panel {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
       text: trow.control.label
-      color: trow.ui ? trow.ui.foreground : Color.foreground
+      color: trow.ui ? trow.ui.foreground : Commons.Color.foreground
       font.family: trow.ui ? trow.ui.fontFamily : Style.font.family
       font.pixelSize: Style.font.body
     }
@@ -274,8 +275,8 @@ Panel {
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
       checked: trow.ui ? trow.ui.paramOf(trow.control.key) === true : false
-      foreground: trow.ui ? trow.ui.foreground : Color.foreground
-      accent: trow.ui ? trow.ui.accent : Color.accent
+      foreground: trow.ui ? trow.ui.foreground : Commons.Color.foreground
+      accent: trow.ui ? trow.ui.accent : Commons.Color.accent
       onToggled: if (trow.ui) trow.ui.override(trow.control.key, !checked)
     }
   }
@@ -488,7 +489,7 @@ Panel {
               width: (parent.width - Style.space(8)) / 2
               ui: root
               label: root.activeIsUser ? "Delete this copy" : "Reset to stock"
-              labelColor: root.activeIsUser ? Color.urgent : root.foreground
+              labelColor: root.activeIsUser ? Commons.Color.urgent : root.foreground
               onClicked: {
                 if (!root.svc) return
                 if (root.activeIsUser) root.svc.deleteUserPreset(root.svc.presetId)
